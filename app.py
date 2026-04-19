@@ -560,6 +560,20 @@ def _no_data():
     ])
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# MAPA DE CONFIGURACIÓN POR TAB
+# ═══════════════════════════════════════════════════════════════════════════════
+# Cada tab tiene sus secciones específicas del acordeón
+CONFIG_TABS = {
+    "tab-demanda": ["acc-gen"],
+    "tab-agregacion": ["acc-gen", "acc-agr"],
+    "tab-desag": ["acc-gen", "acc-agr", "acc-desag"],
+    "tab-sim": ["acc-sim"],
+    "tab-kpis": [],
+    "tab-sensores": [],
+    "tab-escenarios": [],
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # LAYOUT — PANEL DE CONFIGURACIÓN EXPANDIDO
 # ═══════════════════════════════════════════════════════════════════════════════
 NAV_ITEMS = [
@@ -736,17 +750,17 @@ config_panel = html.Div([
                        "fontWeight":"700","fontSize":"13px","letterSpacing":"0.1em",
                        "borderRadius":"4px","cursor":"pointer","marginTop":"4px"}),
             html.Div(id="run-sim-status", style={"color":"#198754","fontSize":"12px",
-                                                   "fontFamily":"IBM Plex Mono, monospace",
-                                                   "marginTop":"8px"}),
+                                                  "fontFamily":"IBM Plex Mono, monospace",
+                                                  "marginTop":"8px"}),
         ], item_id="acc-sim"),
 
-    ], active_item="acc-gen", always_open=False,
+    ], id="main-accordion", active_item=["acc-gen"], always_open=False,
        style={"border":"none"}),
 
     # ─── Botón pipeline principal ─────────────────────────────────────────
     html.Div([
         dbc.Row([
-            dbc.Col(html.Button("▶  EJECUTAR PIPELINE (Demanda + Agregación + Desagregación)",
+            dbc.Col(html.Button("▶  EJECUTAR PIPELINE (Demanda + Agregación + Desagregación)"
                         id="btn-run", n_clicks=0,
                         style={"background":"#E8A838","color":"#0a0d11","border":"none",
                                "padding":"10px 28px","fontFamily":"Barlow Condensed, sans-serif",
@@ -756,9 +770,9 @@ config_panel = html.Div([
                              style={"color":"#198754","fontSize":"12px","padding":"10px 0",
                                     "fontFamily":"IBM Plex Mono, monospace"}), width=4),
         ]),
-    ], style={"padding":"12px 0 0"}),
+    ], id="pipeline-button-container", style={"padding":"12px 0 0"}),
 
-], style={"padding":"12px 24px 0"})
+], id="config-panel-wrapper", style={"padding":"12px 24px 0"})
 
 # ─── Área de contenido ───────────────────────────────────────────────────────
 content_area = html.Div([
@@ -811,6 +825,20 @@ app.layout = html.Div([
 # ═══════════════════════════════════════════════════════════════════════════════
 # CALLBACKS
 # ═══════════════════════════════════════════════════════════════════════════════
+
+# ── 0. Actualizar acordeón según tab activo ───────────────────────────────────
+@app.callback(
+    Output("main-accordion", "active_item"),
+    Input("store-active-tab", "data"),
+    prevent_initial_call=False,
+)
+def update_accordion_by_tab(tab):
+    """Muestra solo las secciones relevantes para cada tab."""
+    if tab in CONFIG_TABS:
+        sections = CONFIG_TABS[tab]
+        if sections:
+            return sections
+    return ["acc-gen"]  # Default para tabs sin config
 
 # ── 1. Mostrar capacidad laboral efectiva ─────────────────────────────────────
 @app.callback(
@@ -972,7 +1000,7 @@ def correr_escenarios(n, sels, plan_mes, esc_store):
         "base":         {"fd":1.0,"falla":False,"ft":1.0,"dh":0},
         "demanda_20":   {"fd":1.2,"falla":False,"ft":1.0,"dh":0},
         "falla_horno":  {"fd":1.0,"falla":True, "ft":1.0,"dh":0},
-        "red_cap":      {"fd":1.0,"falla":False,"ft":1.0,"dh":-1},
+        "red_cap":      {"fd":1.0,"fulla":False,"ft":1.0,"dh":-1},
         "doble_turno":  {"fd":1.0,"falla":False,"ft":0.80,"dh":0},
         "lote_grande":  {"fd":1.0,"falla":False,"ft":1.0,"dh":0,"fl":1.5},
         "optimizado":   {"fd":1.0,"falla":False,"ft":0.85,"dh":1},
